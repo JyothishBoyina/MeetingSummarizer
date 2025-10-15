@@ -20,12 +20,11 @@ function FileUpload({ setSummaryData }) {
       setLoading(true);
       console.log("📤 Sending file to backend:", file.name, file.type, file.size);
       
-      // ✅ Updated to port 5001
       const res = await axios.post("http://localhost:5001/api/summarize", formData, {
         headers: { 
           "Content-Type": "multipart/form-data",
         },
-        timeout: 60000, // 60 second timeout
+        timeout: 60000, 
       });
       
       console.log("✅ Backend response:", res.data);
@@ -35,16 +34,13 @@ function FileUpload({ setSummaryData }) {
       console.error("❌ Full error details:", error);
       
       if (error.response) {
-        // Server responded with error status
         console.error("❌ Server error response:", error.response.data);
         console.error("❌ Server error status:", error.response.status);
         alert(`Server error: ${error.response.data.error || error.response.statusText}`);
       } else if (error.request) {
-        // Request was made but no response received
         console.error("❌ No response from server:", error.request);
         alert("No response from server. Please check if the backend is running on port 5001.");
       } else {
-        // Something else happened
         console.error("❌ Error message:", error.message);
         alert(`Error: ${error.message}`);
       }

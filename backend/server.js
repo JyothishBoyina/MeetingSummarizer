@@ -9,7 +9,6 @@ dotenv.config();
 
 const app = express();
 
-// Enhanced CORS configuration
 app.use(cors({
   origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"],
   credentials: true,
@@ -17,20 +16,16 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
 }));
 
-// Body parser middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Log all incoming requests
 app.use((req, res, next) => {
   console.log(`📍 ${req.method} ${req.path}`);
   next();
 });
 
-// Routes
 app.use("/api", summaryRoutes);
 
-// Test route to verify server is working
 app.get("/health", (req, res) => {
   res.json({ 
     status: "OK", 
@@ -39,7 +34,6 @@ app.get("/health", (req, res) => {
   });
 });
 
-// Default route
 app.get("/", (req, res) => {
   res.json({ 
     message: "Meeting Summarizer API Server", 
@@ -52,7 +46,6 @@ app.get("/", (req, res) => {
   });
 });
 
-// MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log("✅ MongoDB Connected Successfully");
@@ -63,12 +56,10 @@ mongoose.connect(process.env.MONGO_URI)
     process.exit(1);
   });
 
-// Error handling for unhandled routes
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
 });
 
-// Global error handler
 app.use((error, req, res, next) => {
   console.error("🔥 Global error handler:", error);
   res.status(500).json({ 

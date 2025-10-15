@@ -1,13 +1,10 @@
 import React from "react";
 
 function SummaryDisplay({ data }) {
-  // Format the summary text with proper line breaks
   const formatSummary = (text) => {
     if (!text) return "No summary available.";
     
-    // Replace bullet points and line breaks with proper HTML
     return text.split('\n').map((line, index) => {
-      // Check if line contains bullet points or sections
       if (line.includes('•') || line.includes('✅') || line.includes('1.')) {
         return (
           <div key={index} style={{ marginLeft: '20px', marginBottom: '8px' }}>
@@ -15,7 +12,6 @@ function SummaryDisplay({ data }) {
           </div>
         );
       } else if (line.trim() && !line.includes('---') && !line.includes('===')) {
-        // Main headings
         if (line.toUpperCase() === line && line.length < 50) {
           return (
             <h3 key={index} style={{ marginTop: '20px', marginBottom: '10px', color: '#1e293b' }}>
@@ -23,7 +19,6 @@ function SummaryDisplay({ data }) {
             </h3>
           );
         }
-        // Regular paragraphs
         return (
           <p key={index} style={{ marginBottom: '12px', lineHeight: '1.5' }}>
             {line}

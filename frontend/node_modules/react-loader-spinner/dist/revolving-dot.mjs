@@ -1,0 +1,5 @@
+import r from'react';import v from'styled-components';var o="#4fa94d",i={"aria-busy":true,role:"progressbar"};var n=v.div`
+  display: ${e=>e.$visible?"flex":"none"};
+`;var s="http://www.w3.org/2000/svg";var S=({radius:e=45,strokeWidth:a=5,color:t=o,secondaryColor:l,ariaLabel:p="revolving-dot-loading",wrapperStyle:c,wrapperClass:g,visible:m=true})=>r.createElement(n,{style:c,$visible:m,className:g,"aria-label":p,"data-testid":"revolving-dot-loading",...i},r.createElement("svg",{version:"1.1",width:`calc(${e} * 2.5)`,height:`calc(${e} * 2.5)`,xmlns:s,x:"0px",y:"0px","data-testid":"revolving-dot-svg"},r.createElement("circle",{fill:"none",stroke:l||t,strokeWidth:a,cx:`calc(${e} * 1.28)`,cy:`calc(${e} * 1.28)`,r:e,style:{opacity:.5}}),r.createElement("circle",{fill:t,stroke:t,strokeWidth:"3",cx:`calc(${e} * 1.28)`,cy:`calc(${e} / 3.5)`,r:`calc(${e} / 5)`,style:{transformOrigin:"50% 50%"}},r.createElement("animateTransform",{attributeName:"transform",dur:"2s",type:"rotate",from:"0",to:"360",repeatCount:"indefinite"}))));
+export{S as RevolvingDot};//# sourceMappingURL=revolving-dot.mjs.map
+//# sourceMappingURL=revolving-dot.mjs.map

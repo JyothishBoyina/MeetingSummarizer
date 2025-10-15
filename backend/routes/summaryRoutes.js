@@ -4,7 +4,6 @@ import { GoogleGenAI } from "@google/genai";
 import Summary from "../models/Summary.js";
 import dotenv from "dotenv";
 
-// Load environment variables
 dotenv.config();
 
 const router = express.Router();
@@ -15,7 +14,6 @@ const upload = multer({
   }
 });
 
-// Initialize Google GenAI
 let genAI = null;
 if (process.env.GEMINI_API_KEY) {
   genAI = new GoogleGenAI({
@@ -24,59 +22,40 @@ if (process.env.GEMINI_API_KEY) {
   console.log("✅ Google GenAI initialized successfully");
 }
 
-// Enhanced function to remove ALL markdown formatting
 function removeMarkdownCompletely(text) {
   if (!text) return text;
   
   let cleanText = text
-    // Remove headers (###, ##, #) and their content on same line
     .replace(/^#+\s+(.*$)/gim, '$1')
-    // Remove bold (**text**)
     .replace(/\*\*(.*?)\*\*/g, '$1')
-    // Remove italic (*text*)
     .replace(/\*(.*?)\*/g, '$1')
-    // Remove horizontal rules (---, ***)
     .replace(/^[-*]{3,}$/gim, '')
-    // Remove blockquotes (> text)
     .replace(/^>\s+/gim, '')
-    // Remove inline code (`code`)
     .replace(/`([^`]+)`/g, '$1')
-    // Remove code blocks (```code```)
     .replace(/```[\s\S]*?```/g, '')
-    // Remove links [text](url)
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    // Remove tables
     .replace(/^\|.+\|$/gim, '')
-    // Remove markdown section dividers (--- in content)
     .replace(/\n---\n/g, '\n')
-    // Clean up multiple newlines
     .replace(/\n\s*\n\s*\n/g, '\n\n')
     .replace(/\n{3,}/g, '\n\n')
-    // Trim whitespace
     .trim();
 
   return cleanText;
 }
 
-// Function to format as clean plain text
 function formatAsPlainText(text) {
   if (!text) return text;
   
   let formatted = text
-    // Replace markdown bullets with plain bullets
     .replace(/^\s*[-*+]\s+/gim, '• ')
-    // Replace numbered lists
     .replace(/^\s*\d+\.\s+/gim, (match) => match.trim() + ' ')
-    // Ensure proper spacing
     .replace(/\n\s*\n\s*\n/g, '\n\n')
-    // Clean up extra spaces
     .replace(/[ ]+/g, ' ')
     .trim();
 
   return formatted;
 }
 
-// Improved audio processing with plain text request
 async function processAudioFile(audioBuffer, fileName, mimeType) {
   try {
     console.log("🎵 Starting audio processing...");
@@ -93,7 +72,6 @@ async function processAudioFile(audioBuffer, fileName, mimeType) {
       size: `${(audioBuffer.length / (1024 * 1024)).toFixed(2)} MB`
     });
 
-    // STRONG plain text prompt
     const prompt = `IMPORTANT: Provide output in PLAIN TEXT ONLY. NO MARKDOWN, NO FORMATTING.
 
 Please analyze this audio file and provide:
@@ -162,7 +140,6 @@ CRITICAL: Use plain text only. No asterisks, no bold, no italics, no markdown sy
 
     console.log("✅ Audio processing completed");
     
-    // Apply multiple cleaning passes
     let cleanText = response.text;
     cleanText = removeMarkdownCompletely(cleanText);
     cleanText = formatAsPlainText(cleanText);
@@ -184,12 +161,10 @@ CRITICAL: Use plain text only. No asterisks, no bold, no italics, no markdown sy
   }
 }
 
-// Parse the cleaned response
 function parseCleanedResponse(cleanContent, fileName) {
   let transcript = "";
   let summary = "";
 
-  // Try to find transcript and summary sections
   const transcriptKeywords = ['TRANSCRIPT', 'MEETING CONTENT', 'CONVERSATION', 'SPEAKER'];
   const summaryKeywords = ['SUMMARY', 'MEETING SUMMARY', 'KEY POINTS', 'OVERVIEW'];
   
@@ -203,7 +178,6 @@ function parseCleanedResponse(cleanContent, fileName) {
     line = line.trim();
     if (!line) continue;
 
-    // Check if we're entering a section
     const upperLine = line.toUpperCase();
     
     if (transcriptKeywords.some(keyword => upperLine.includes(keyword))) {
@@ -218,13 +192,11 @@ function parseCleanedResponse(cleanContent, fileName) {
       continue;
     }
 
-    // Add content to appropriate section
     if (inTranscript) {
       transcriptLines.push(line);
     } else if (inSummary) {
       summaryLines.push(line);
     } else {
-      // If no sections detected, assume first part is transcript, second part is summary
       if (summaryLines.length === 0 && transcriptLines.length > 5) {
         summaryLines.push(line);
       } else {
@@ -236,7 +208,6 @@ function parseCleanedResponse(cleanContent, fileName) {
   transcript = transcriptLines.join('\n').trim();
   summary = summaryLines.join('\n').trim();
 
-  // If we couldn't parse properly, make reasonable defaults
   if (!transcript && !summary) {
     transcript = cleanContent;
     summary = `Meeting summary for: ${fileName}\n\nThe audio file has been processed and analyzed. Please refer to the transcript for detailed discussion.`;
@@ -247,7 +218,6 @@ function parseCleanedResponse(cleanContent, fileName) {
   return { transcript, summary };
 }
 
-// POST /api/summarize
 router.post("/summarize", upload.single("audio"), async (req, res) => {
   console.log("🔵 /api/summarize route hit");
   
@@ -282,13 +252,11 @@ router.post("/summarize", upload.single("audio"), async (req, res) => {
       });
     }
 
-    // Parse the cleaned content
     const { transcript, summary } = parseCleanedResponse(processedContent, req.file.originalname);
 
     console.log("📄 Final transcript length:", transcript.length);
     console.log("📄 Final summary length:", summary.length);
 
-    // Save to database
     const newSummary = new Summary({
       fileName: req.file.originalname,
       transcript: transcript,
@@ -321,7 +289,6 @@ router.post("/summarize", upload.single("audio"), async (req, res) => {
   }
 });
 
-// GET /api/summaries
 router.get("/summaries", async (req, res) => {
   try {
     const summaries = await Summary.find().sort({ createdAt: -1 });
